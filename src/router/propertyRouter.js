@@ -87,3 +87,7 @@ propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), asy
     }
   });
   
+
+  module.exports = {
+    propertyRouter
+  }

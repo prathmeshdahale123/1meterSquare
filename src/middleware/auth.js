@@ -1,5 +1,6 @@
 // middlewares/authMiddleware.js
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const auth = (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ const auth = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = {
-      userId: decoded._id,
+      _id: decoded._id,
       role: decoded.role
     };
 
@@ -20,4 +21,4 @@ const auth = (req, res, next) => {
 
 module.exports = {
     auth
-};
+}
