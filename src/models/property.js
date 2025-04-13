@@ -4,9 +4,11 @@ const propertySchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    maxLength: 100
   },
   description: {
     type: String,
+    maxLength: 1000 
   },
   price: {
     type: Number,

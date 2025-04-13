@@ -9,11 +9,11 @@ const { roleCheck } = require("../middleware/rolemiddleware");
 propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), async (req, res) => {
     try {
       const { title, description, price, location, images } = req.body;
-  
+
       if (!title || !price || !location || !location.city) {
         throw new Error("Required fields missing");
       }
-  
+
       const newProperty = new Property({
         title,
         description,
@@ -33,7 +33,7 @@ propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), asy
 //   Get all properties
   propertyRouter.get("/api/properties", async (req, res) => {
     try {
-      const properties = await Property.find().populate("listedBy", "name role");
+      const properties = await Property.find().populate("listedBy", "firstName lastName role");
       res.send(properties);
     } catch (err) {
       res.status(500).send("Failed to fetch properties");
@@ -43,7 +43,9 @@ propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), asy
 // Get details of a specific property by ID.
   propertyRouter.get("/api/properties/:id", async (req, res) => {
     try {
-      const property = await Property.findById(req.params.id).populate("listedBy", "name contactNumber");
+      const property = await Property.findById(req.params.id)
+      .populate("listedBy", "firstName lastName contactNumber");
+      
       if (!property) throw new Error("Property not found");
       res.send(property);
     } catch (err) {

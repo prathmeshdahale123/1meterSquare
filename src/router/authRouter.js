@@ -1,6 +1,6 @@
 const express = require("express");
 const authRouter = express.Router();
-const { User } = require("../models/User");
+const { User } = require("../models/User"); 
 const validator = require("validator");
 const { auth } = require("../middleware/auth");
 const bcrypt = require("bcrypt");
@@ -50,6 +50,7 @@ authRouter.post("/register", async (req, res) => {
   
       const user = await User.findOne({ email });
       if (!user) throw new Error("User not found");
+      
   
       const isPassValid = await user.validatePassword(password);
       if (!isPassValid) throw new Error("Invalid password");
