@@ -39,12 +39,16 @@ propertyRouter.get("/feed", async (req, res) => {
       maxPrice,
       page = 1,
       limit = 10,
+      north,
+      south,
+      east,
+      west,
     } = req.query;
 
     const filter = {};
 
     if (search) {
-      const regex = new RegExp(search, "i"); 
+      const regex = new RegExp(search, "i");
       filter.$or = [
         { title: regex },
         { "location.city": regex },
@@ -56,6 +60,11 @@ propertyRouter.get("/feed", async (req, res) => {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    if (north && south && east && west) {
+      filter["location.coordinates.lat"] = { $lte: Number(north), $gte: Number(south) };
+      filter["location.coordinates.lng"] = { $lte: Number(east), $gte: Number(west) };
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -72,6 +81,7 @@ propertyRouter.get("/feed", async (req, res) => {
     res.status(500).send("ERROR: " + err.message);
   }
 });
+
 
 
 // Get details of a specific property by ID.
