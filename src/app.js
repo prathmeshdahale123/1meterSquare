@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const { connectDB } = require("./config/database")
 const { propertyRouter } = require("./router/propertyRouter")
 const { authRouter } = require("./router/authRouter")
+const { favoriteRouter } = require("./router/favoriteRouter")
 require("dotenv").config();
 
 app.use(express.json());
@@ -11,6 +12,8 @@ app.use(cookieParser());
 
 app.use("/", propertyRouter)
 app.use("/", authRouter)
+app.use("/", favoriteRouter)
+
 
 
 

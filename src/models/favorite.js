@@ -15,8 +15,8 @@ const favoritePropertySchema = new mongoose.Schema({
   timestamps: true 
 });
 
-const favoriteProperty = mongoose.model("favoriteProperty", favoritePropertySchema);
+const Favorite = mongoose.model("favoriteProperty", favoritePropertySchema);
 
 module.exports = {
-    favoriteProperty
+    Favorite
 };
