@@ -30,15 +30,49 @@ propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), asy
     }
   });
   
-//   Get all properties
-  propertyRouter.get("/api/properties", async (req, res) => {
-    try {
-      const properties = await Property.find().populate("listedBy", "firstName lastName role");
-      res.send(properties);
-    } catch (err) {
-      res.status(500).send("Failed to fetch properties");
+//   Get all properties (feed API)
+propertyRouter.get("/feed", async (req, res) => {
+  try {
+    const {
+      search,
+      minPrice,
+      maxPrice,
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const filter = {};
+
+    if (search) {
+      const regex = new RegExp(search, "i"); 
+      filter.$or = [
+        { title: regex },
+        { "location.city": regex },
+        { "location.state": regex },
+      ];
     }
-  });
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const properties = await Property.find(filter)
+      .populate("listedBy", "firstName lastName contactNumber")
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Property.countDocuments(filter);
+
+    res.json({properties});
+  } catch (err) {
+    res.status(500).send("ERROR: " + err.message);
+  }
+});
+
 
 // Get details of a specific property by ID.
   propertyRouter.get("/api/properties/:id", async (req, res) => {
