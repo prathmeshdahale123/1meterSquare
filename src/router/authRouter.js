@@ -1,6 +1,6 @@
 const express = require("express");
 const authRouter = express.Router();
-const { User } = require("../models/User"); 
+const { User } = require("../models/user"); 
 const validator = require("validator");
 const { auth } = require("../middleware/auth");
 const bcrypt = require("bcrypt");
@@ -71,18 +71,6 @@ authRouter.post("/register", async (req, res) => {
     res.send("Logged out successfully");
   });
 
-// Get Current User
-  authRouter.get("/me", auth, async (req, res) => {
-    try {
-      const user = await User.findById(req.user._id).select("-password");
-      if (!user) throw new Error("User not found");
-  
-      res.send(user);
-    } catch (err) {
-      res.status(400).send("ERROR: " + err.message);
-    }
-  });
-  
   
   module.exports = { 
     authRouter
