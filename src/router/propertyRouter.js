@@ -3,32 +3,48 @@ const propertyRouter = express.Router();
 const { Property } = require("../models/property");
 const { auth } = require("../middleware/auth");
 const { roleCheck } = require("../middleware/rolemiddleware");
+const { upload } = require("../middleware/upload");
 
 
-// create new property listing
-propertyRouter.post("/api/properties", auth, roleCheck(["seller", "admin"]), async (req, res) => {
+// Create a new property with image upload
+propertyRouter.post(
+  "/api/properties",
+  auth,
+  roleCheck(["seller", "admin"]),
+  upload.array("images", 5), 
+  async (req, res) => {
     try {
-      const { title, description, price, location, images } = req.body;
+      const { title, description, price, location } = req.body;
 
-      if (!title || !price || !location || !location.city) {
+      // Parse location from string (form-data) to object
+      const parsedLocation = typeof location === "string"
+        ? JSON.parse(location)
+        : location;
+
+      if (!title || !price || !parsedLocation || !parsedLocation.city) {
         throw new Error("Required fields missing");
       }
+
+      const imageUrls = req.files.map((file) => file.path);
 
       const newProperty = new Property({
         title,
         description,
         price,
-        location,
-        images,
+        location: parsedLocation,
+        images: imageUrls,
         listedBy: req.user._id,
       });
-  
+
       await newProperty.save();
-      res.status(201).send("Property created successfully");
-    } catch (error) {
-      res.status(400).send("ERROR: " + error.message);
+      res.status(201).send("Property created succesfully");
+    } catch (err) {
+      res.status(400).send("ERROR: " + err.message);
     }
-  });
+  }
+);
+
+
   
 //   Get all properties (feed API)
 propertyRouter.get("/feed", async (req, res) => {
