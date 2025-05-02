@@ -23,8 +23,8 @@ app.use("/", profileRouter)
 connectDB()
 .then(() => {
     console.log("database connected succesfully...");
-    app.listen(3333, () => {
-        console.log("Server is listening on port 3333");
+    app.listen(process.env.PORT, () => {
+        console.log("Server is listening on port");
     })
     
 }).catch(() => {
