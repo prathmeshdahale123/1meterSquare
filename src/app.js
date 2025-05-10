@@ -7,6 +7,7 @@ const { authRouter } = require("./router/authRouter")
 const { favoriteRouter } = require("./router/favoriteRouter")
 const { profileRouter } = require("./router/profileRouter")
 require("dotenv").config();
+const cors = require("cors");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -16,7 +17,20 @@ app.use("/", authRouter)
 app.use("/", favoriteRouter)
 app.use("/", profileRouter)
 
-
+const allowedOrigins = [
+    "http://localhost:5173"              
+];
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true
+  }));
+  
 
 
 
