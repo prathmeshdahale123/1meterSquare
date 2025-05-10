@@ -18,7 +18,8 @@ app.use("/", favoriteRouter)
 app.use("/", profileRouter)
 
 const allowedOrigins = [
-    "http://localhost:5173"              
+    "http://localhost:5173",
+    "https://dream-market-service.vercel.app"              
 ];
   
   app.use(cors({
