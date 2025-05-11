@@ -69,4 +69,15 @@ authRouter.post("/logout", (req, res) => {
   res.status(200).json({ msg: "Logged out successfully" });
 });
 
+authRouter.get("/api/auth/check", auth, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "User is authenticated",
+    user: {
+      _id: req.user._id,
+      role: req.user.role
+    }
+  });
+});
+
 module.exports = { authRouter };
