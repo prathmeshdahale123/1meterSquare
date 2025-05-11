@@ -1,5 +1,4 @@
 const express = require("express");
-const express = require("express");
 const propertyRouter = express.Router();
 const { Property } = require("../models/property");
 const { auth } = require("../middleware/auth");
