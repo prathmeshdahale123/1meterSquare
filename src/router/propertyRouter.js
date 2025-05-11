@@ -1,10 +1,10 @@
 const express = require("express");
+const express = require("express");
 const propertyRouter = express.Router();
 const { Property } = require("../models/property");
 const { auth } = require("../middleware/auth");
 const { roleCheck } = require("../middleware/rolemiddleware");
 const { upload } = require("../middleware/upload");
-
 
 // Create a new property with image upload
 propertyRouter.post(
@@ -37,16 +37,14 @@ propertyRouter.post(
       });
 
       await newProperty.save();
-      res.status(201).send("Property created succesfully");
+      res.status(201).json({ msg: "Property created successfully" });
     } catch (err) {
-      res.status(400).send("ERROR: " + err.message);
+      res.status(400).json({ ERROR: err.message });
     }
   }
 );
 
-
-  
-//   Get all properties (feed API)
+// Get all properties (feed API)
 propertyRouter.get("/feed", async (req, res) => {
   try {
     const {
@@ -92,64 +90,61 @@ propertyRouter.get("/feed", async (req, res) => {
 
     const total = await Property.countDocuments(filter);
 
-    res.json({properties});
+    res.json({ properties, total });
   } catch (err) {
-    res.status(500).send("ERROR: " + err.message);
+    res.status(500).json({ ERROR: err.message });
   }
 });
 
-
-
-// Get details of a specific property by ID.
-  propertyRouter.get("/api/properties/:id", async (req, res) => {
-    try {
-      const property = await Property.findById(req.params.id)
+// Get details of a specific property by ID
+propertyRouter.get("/api/properties/:id", async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id)
       .populate("listedBy", "firstName lastName contactNumber");
-      
-      if (!property) throw new Error("Property not found");
-      res.send(property);
-    } catch (err) {
-      res.status(404).send("ERROR: " + err.message);
-    }
-  });
-  
-// Update a property (only the seller who created it or admin).
-  propertyRouter.put("/api/properties/:id", auth, async (req, res) => {
-    try {
-      const property = await Property.findById(req.params.id);
-      if (!property) throw new Error("Property not found");
-  
-      if (property.listedBy.toString() !== req.user._id && req.user.role !== "admin") {
-        return res.status(403).send("Access denied");
-      }
-  
-      Object.assign(property, req.body);
-      await property.save();
-  
-      res.send("Property updated successfully");
-    } catch (err) {
-      res.status(400).send("ERROR: " + err.message);
-    }
-  });
 
-//   Delete a property (only owner or admin).
-  propertyRouter.delete("/api/properties/:id", auth, async (req, res) => {
-    try {
-      const property = await Property.findById(req.params.id);
-      if (!property) throw new Error("Property not found");
-  
-      if (property.listedBy.toString() !== req.user._id && req.user.role !== "admin") {
-        return res.status(403).send("Access denied");
-      }
-  
-      await property.deleteOne();
-      res.send("Property deleted successfully");
-    } catch (err) {
-      res.status(400).send("ERROR: " + err.message);
-    }
-  });
-  
-
-  module.exports = {
-    propertyRouter
+    if (!property) throw new Error("Property not found");
+    res.json({ property });
+  } catch (err) {
+    res.status(404).json({ ERROR: err.message });
   }
+});
+
+// Update a property (only the seller who created it or admin)
+propertyRouter.put("/api/properties/:id", auth, async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) throw new Error("Property not found");
+
+    if (property.listedBy.toString() !== req.user._id && req.user.role !== "admin") {
+      return res.status(403).json({ ERROR: "Access denied" });
+    }
+
+    Object.assign(property, req.body);
+    await property.save();
+
+    res.status(200).json({ msg: "Property updated successfully" });
+  } catch (err) {
+    res.status(400).json({ ERROR: err.message });
+  }
+});
+
+// Delete a property (only owner or admin)
+propertyRouter.delete("/api/properties/:id", auth, async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) throw new Error("Property not found");
+
+    if (property.listedBy.toString() !== req.user._id && req.user.role !== "admin") {
+      return res.status(403).json({ ERROR: "Access denied" });
+    }
+
+    await property.deleteOne();
+    res.status(200).json({ msg: "Property deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ ERROR: err.message });
+  }
+});
+
+module.exports = {
+  propertyRouter,
+};

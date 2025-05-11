@@ -10,9 +10,9 @@ profileRouter.get("/profile/view", auth, async (req, res) => {
     const user = await User.findById(req.user._id).select("-password");
     if (!user) throw new Error("User not found");
 
-    res.send(user);
+    res.status(200).json({ user });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ ERROR: err.message });
   }
 });
 
@@ -28,9 +28,9 @@ profileRouter.put("/profile/update", auth, async (req, res) => {
     if (contactNumber) user.contactNumber = contactNumber;
 
     await user.save();
-    res.send("Profile updated successfully");
+    res.status(200).json({ msg: "Profile updated successfully" });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ ERROR: err.message });
   }
 });
 
@@ -49,9 +49,9 @@ profileRouter.put("/profile/update/password", auth, async (req, res) => {
     user.password = hashed;
     await user.save();
 
-    res.send("Password updated successfully");
+    res.status(200).json({ msg: "Password updated successfully" });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ ERROR: err.message });
   }
 });
 
