@@ -55,8 +55,11 @@ authRouter.post("/login", async (req, res) => {
     if (!isPassValid) throw new Error("Invalid password");
 
     const token = await user.setJWT();
-    res.cookie("Token", token, { httpOnly: true });
-
+  res.cookie("Token", token, {
+    httpOnly: true,
+    secure: false, // For development
+    sameSite: "None"
+});
     res.status(200).json({ msg: "Login successful" });
   } catch (error) {
     res.status(400).json({ ERROR: error.message });
