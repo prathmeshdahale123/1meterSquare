@@ -30,7 +30,7 @@ profileRouter.put("/profile/update", auth, async (req, res) => {
     if (contactNumber) user.contactNumber = contactNumber;
 
     await user.save();
-    res.status(200).json({ msg: "Profile updated successfully" });
+    res.status(200).json({ message: "Profile updated successfully" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }
@@ -51,7 +51,7 @@ profileRouter.put("/profile/update/password", auth, async (req, res) => {
     user.password = hashed;
     await user.save();
 
-    res.status(200).json({ msg: "Password updated successfully" });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }

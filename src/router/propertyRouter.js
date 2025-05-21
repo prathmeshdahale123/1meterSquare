@@ -36,7 +36,7 @@ propertyRouter.post(
       });
 
       await newProperty.save();
-      res.status(201).json({ msg: "Property created successfully" });
+      res.status(201).json({ message: "Property created successfully" });
     } catch (err) {
       res.status(400).json({ ERROR: err.message });
     }
@@ -121,7 +121,7 @@ propertyRouter.put("/api/properties/:id", auth, async (req, res) => {
     Object.assign(property, req.body);
     await property.save();
 
-    res.status(200).json({ msg: "Property updated successfully" });
+    res.status(200).json({ message: "Property updated successfully" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }
@@ -138,7 +138,7 @@ propertyRouter.delete("/api/properties/:id", auth, async (req, res) => {
     }
 
     await property.deleteOne();
-    res.status(200).json({ msg: "Property deleted successfully" });
+    res.status(200).json({ message: "Property deleted successfully" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }

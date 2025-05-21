@@ -18,7 +18,7 @@ favoriteRouter.post("/api/favorites/:propertyId", auth, async (req, res) => {
     const favorite = new Favorite({ userId: req.user._id, propertyId: propertyId });
     await favorite.save();
 
-    res.status(201).json({ msg: "Added to favorites" });
+    res.status(201).json({ message: "Added to favorites" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }
@@ -42,7 +42,7 @@ favoriteRouter.delete("/api/favorites/:propertyId", auth, async (req, res) => {
     const deleted = await Favorite.findOneAndDelete({ userId: req.user._id, propertyId: propertyId });
     if (!deleted) return res.status(404).json({ ERROR: "Favorite not found" });
 
-    res.status(200).json({ msg: "Removed from favorites" });
+    res.status(200).json({ message: "Removed from favorites" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }

@@ -33,7 +33,7 @@ authRouter.post("/register", async (req, res) => {
     const token = await user.setJWT();
     res.cookie("Token", token, { httpOnly: true });
 
-    res.status(201).json({ msg: "User registered successfully" });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(400).json({ ERROR: err.message });
   }
@@ -60,7 +60,7 @@ authRouter.post("/login", async (req, res) => {
     secure: true,
     sameSite: "None"
 });
-    res.status(200).json({ msg: "Login successful" });
+    res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(400).json({ ERROR: error.message });
   }
