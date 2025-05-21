@@ -68,9 +68,14 @@ authRouter.post("/login", async (req, res) => {
 
 // Logout API
 authRouter.post("/logout", (req, res) => {
-  res.clearCookie("Token");
-  res.status(200).json({ msg: "Logged out successfully" });
+  res.clearCookie("Token", {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true
+  });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 });
+
 
 authRouter.get("/api/auth/check", auth, (req, res) => {
   res.status(200).json({
