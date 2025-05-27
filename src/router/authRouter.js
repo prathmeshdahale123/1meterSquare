@@ -31,7 +31,11 @@ authRouter.post("/register", async (req, res) => {
     await user.save();
 
     const token = await user.setJWT();
-    res.cookie("Token", token, { httpOnly: true });
+    res.cookie("Token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+});
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
