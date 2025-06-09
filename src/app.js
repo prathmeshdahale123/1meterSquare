@@ -11,7 +11,8 @@ const cors = require("cors");
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://dream-market-service.vercel.app"              
+    "https://dream-market-service.vercel.app",
+    "http://localhost:8080"     
 ];
   
   app.use(cors({
