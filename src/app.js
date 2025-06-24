@@ -29,6 +29,15 @@ const allowedOrigins = [
 app.use(express.json());
 app.use(cookieParser());
 
+//health check route
+app.get('/health', (_req, res) => {
+      res.status(200).json({
+        success: true,
+        message: 'Backend is running',
+      });
+    });
+
+    
 app.use("/", propertyRouter)
 app.use("/", authRouter)
 app.use("/", favoriteRouter)
