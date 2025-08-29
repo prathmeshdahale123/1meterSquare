@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const app = express();
 const cookieParser = require("cookie-parser");
 const { connectDB } = require("./config/database")
@@ -6,11 +7,11 @@ const { propertyRouter } = require("./router/propertyRouter")
 const { authRouter } = require("./router/authRouter")
 const { favoriteRouter } = require("./router/favoriteRouter")
 const { profileRouter } = require("./router/profileRouter")
-require("dotenv").config();
 const cors = require("cors");
 
 const allowedOrigins = [
     "http://localhost:5173",
+    "http://localhost:3000",
     "https://dream-market-service.vercel.app",
     'https://82786a53-d857-4646-8858-fa3d28bd0804.lovableproject.com',
     "http://localhost:8080"     

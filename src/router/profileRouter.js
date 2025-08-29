@@ -4,7 +4,7 @@ const { User } = require("../models/user");
 const { auth } = require("../middleware/auth");
 const bcrypt = require("bcrypt");
 const { OTP } = require("../models/otp");
-const { sendEmail } = require("../utils/sendEmail");
+const { sendEmail } = require("../utils/email");
 
 // Get current user's profile
 profileRouter.get("/profile/view", auth, async (req, res) => {
