@@ -5,10 +5,11 @@ const { User } = require("../models/user");
 const { auth } = require("../middleware/auth");
 const {sendEmail} = require("../utils/email");
 
-// --- 1. REGISTER A NEW USER ---
+// --- 1. REGISTER A NEW USER (UPDATED FOR SECURITY) ---
 authRouter.post("/register", async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, role, contactNumber } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, contactNumber } = req.body;
+    
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ success: false, message: "Please provide all required fields." });
     }
@@ -17,16 +18,11 @@ authRouter.post("/register", async (req, res) => {
       return res.status(409).json({ success: false, message: "An account with this email already exists." });
     }
 
-    // 1. Create the user instance WITHOUT confirmPassword initially
-    const user = new User({ firstName, lastName, email, password, role, contactNumber });
+    const user = new User({ firstName, lastName, email, password, contactNumber });
     
-    // 2. Manually set the confirmPassword field. This will trigger the virtual setter.
     user.confirmPassword = confirmPassword;
-    // -----------------
 
     const otp = user.generateEmailVerificationToken();
-
-    // 3. Now, save the user. The pre-save hook will run correctly.
     await user.save(); 
     
     const message = `Welcome! Your verification OTP is: ${otp}\nIt will expire in 10 minutes.`;
@@ -40,6 +36,7 @@ authRouter.post("/register", async (req, res) => {
     res.status(400).json({ success: false, message: "Failed to register user.", error: error.message });
   }
 });
+
 
 
 // --- 2. VERIFY EMAIL & LOGIN (This route is updated) ---
@@ -64,7 +61,6 @@ authRouter.post('/verify-otp', async (req, res) => {
         user.emailVerificationExpires = undefined;
         await user.save();
 
-        // --- CHANGE: Automatically log the user in after verification ---
         const token = user.generateAuthToken();
         res.cookie("token", token, { 
             httpOnly: true, 
@@ -95,8 +91,6 @@ authRouter.post("/login", async (req, res) => {
     if (!user) {
         return res.status(401).json({ success: false, message: "Invalid credentials." });
     }
-
-    // --- CHANGE: The check for email verification is now REMOVED ---
 
     const isPassValid = await user.validatePassword(password);
     if (!isPassValid) {
