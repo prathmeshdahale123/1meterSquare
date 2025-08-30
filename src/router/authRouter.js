@@ -5,10 +5,11 @@ const { User } = require("../models/user");
 const { auth } = require("../middleware/auth");
 const {sendEmail} = require("../utils/email");
 
-// --- 1. REGISTER A NEW USER (UPDATED FOR SECURITY) ---
+// --- 1. REGISTER A NEW USER (UPDATED with Intent Logic) ---
 authRouter.post("/register", async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, contactNumber } = req.body;
+    // 1. Look for the new 'intent' field from the request body
+    const { firstName, lastName, email, password, confirmPassword, contactNumber, intent } = req.body;
     
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ success: false, message: "Please provide all required fields." });
@@ -18,7 +19,21 @@ authRouter.post("/register", async (req, res) => {
       return res.status(409).json({ success: false, message: "An account with this email already exists." });
     }
 
-    const user = new User({ firstName, lastName, email, password, contactNumber });
+    // 2. Set the role based on the user's intent
+    let userRole = 'buyer';
+    if (intent === 'sell') {
+        userRole = 'seller';
+    }
+
+    // 3. Create the user, passing in the role we determined on the server
+    const user = new User({ 
+        firstName, 
+        lastName, 
+        email, 
+        password, 
+        contactNumber,
+        role: userRole // Use the role determined by our secure logic
+    });
     
     user.confirmPassword = confirmPassword;
 
