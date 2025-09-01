@@ -5,17 +5,22 @@ const { User } = require("../models/user");
 const { auth } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 
-// --- CREATE A NEW PROPERTY ---
+// --- CREATE A NEW PROPERTY (Updated for RERA and Resale Logic) ---
 propertyRouter.post(
     "/api/properties",
     auth,
     upload.array("images", 10),
     async (req, res) => {
         try {
-            const { title, description, propertyType, price, location, details, amenities } = req.body;
+            // 1. Destructure the new `isResaleProperty` and `reraId` fields
+            const { title, description, propertyType, price, location, details, amenities, isResaleProperty, reraId } = req.body;
 
+            // 2. Add validation for the new required field
+            if (isResaleProperty === undefined) { // Check for undefined to allow `false`
+                return res.status(400).json({ success: false, message: "Please specify if this is a resale property." });
+            }
             if (!title || !propertyType || !price || !location || !details || !req.files || req.files.length === 0) {
-                return res.status(400).json({ success: false, message: "Missing required fields." });
+                 return res.status(400).json({ success: false, message: "Missing required fields." });
             }
 
             const parsedPrice = JSON.parse(price);
@@ -24,31 +29,28 @@ propertyRouter.post(
 
             const newPropertyData = {
                 title, description, propertyType,
-                price: {
-                    value: Number(parsedPrice.value),
-                    isNegotiable: parsedPrice.isNegotiable || false,
-                },
-                location: {
-                    address: parsedLocation.address, city: parsedLocation.city, state: parsedLocation.state, pincode: parsedLocation.pincode,
-                    coordinates: { coordinates: [parsedLocation.coordinates.lng, parsedLocation.coordinates.lat] },
-                },
-                details: {
-                    area: { value: Number(parsedDetails.area.value) },
-                    bedrooms: Number(parsedDetails.bedrooms), bathrooms: Number(parsedDetails.bathrooms),
-                    furnishingStatus: parsedDetails.furnishingStatus, possessionDate: parsedDetails.possessionDate, floor: Number(parsedDetails.floor),
-                },
+                price: { value: Number(parsedPrice.value), isNegotiable: parsedPrice.isNegotiable || false },
+                location: { address: parsedLocation.address, city: parsedLocation.city, state: parsedLocation.state, pincode: parsedLocation.pincode, coordinates: { coordinates: [parsedLocation.coordinates.lng, parsedLocation.coordinates.lat] }},
+                details: { area: { value: Number(parsedDetails.area.value) }, bedrooms: Number(parsedDetails.bedrooms), bathrooms: Number(parsedDetails.bathrooms), furnishingStatus: parsedDetails.furnishingStatus, possessionDate: parsedDetails.possessionDate, floor: Number(parsedDetails.floor) },
                 amenities: amenities ? JSON.parse(amenities) : [],
                 images: req.files.map((file) => file.path),
                 thumbnail: req.files[0].path,
                 listedBy: req.user._id,
+
+                // 3. Add the new fields to the object being created
+                // Booleans from form-data come as strings ("true" or "false"), so we parse them.
+                isResaleProperty: JSON.parse(isResaleProperty), 
+                reraId: reraId || undefined, // Include reraId if it's provided
             };
 
             const property = new Property(newPropertyData);
-            await property.save();
+            // The pre-validate hook in the Property model will now run and check the RERA ID logic
+            await property.save(); 
             
             res.status(201).json({ success: true, message: "Property listed successfully.", data: property });
 
         } catch (error) {
+            // This will now correctly catch any validation errors from the model
             res.status(400).json({ success: false, message: "Failed to create property.", error: error.message });
         }
     }

@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String, enum: ["buyer", "seller", "admin"], default: "buyer",
   },
+   sellerType: {
+        type: String, 
+        enum: ['Owner', 'Agent', 'Builder'],
+        // Mongoose allows a function for the 'required' property for conditional validation
+        required: [function() { return this.role === 'seller'; }, 'Seller type (Owner, Agent, or Builder) is required.'],
+    },
   contactNumber: {
     type: String, validate: [validator.isMobilePhone, "Please provide a valid contact number"],
   },

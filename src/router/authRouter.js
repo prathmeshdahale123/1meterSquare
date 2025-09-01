@@ -8,50 +8,48 @@ const {sendEmail} = require("../utils/email");
 // --- 1. REGISTER A NEW USER (UPDATED with Intent Logic) ---
 authRouter.post("/register", async (req, res) => {
   try {
-    // 1. Look for the new 'intent' field from the request body
-    const { firstName, lastName, email, password, confirmPassword, contactNumber, intent } = req.body;
+    // 1. Destructure `sellerType` from the request body
+    const { firstName, lastName, email, password, confirmPassword, contactNumber, intent, sellerType } = req.body;
     
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ success: false, message: "Please provide all required fields." });
     }
+
+    let userRole = 'buyer';
+    if (intent === 'sell') {
+        userRole = 'seller';
+        // 2. If intent is to sell, the sellerType is now mandatory
+        if (!sellerType || !['Owner', 'Agent', 'Builder'].includes(sellerType)) {
+            return res.status(400).json({ success: false, message: "A valid seller type (Owner, Agent, or Builder) is required to register as a seller." });
+        }
+    }
+    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ success: false, message: "An account with this email already exists." });
     }
 
-    // 2. Set the role based on the user's intent
-    let userRole = 'buyer';
-    if (intent === 'sell') {
-        userRole = 'seller';
-    }
-
-    // 3. Create the user, passing in the role we determined on the server
+    // 3. Create the user with the role and sellerType
     const user = new User({ 
-        firstName, 
-        lastName, 
-        email, 
-        password, 
-        contactNumber,
-        role: userRole // Use the role determined by our secure logic
+        firstName, lastName, email, password, contactNumber,
+        role: userRole,
+        sellerType: userRole === 'seller' ? sellerType : undefined // Only set sellerType if the role is seller
     });
     
     user.confirmPassword = confirmPassword;
 
     const otp = user.generateEmailVerificationToken();
-    await user.save(); 
+    await user.save(); // Mongoose will now validate the conditional 'sellerType' requirement
     
+    // ... (send email and response logic)
     const message = `Welcome! Your verification OTP is: ${otp}\nIt will expire in 10 minutes.`;
     await sendEmail({ email: user.email, subject: 'Email Verification OTP', message });
-    
-    res.status(201).json({
-      success: true,
-      message: `User registered. An OTP has been sent to ${user.email} for verification.`,
-    });
+    res.status(201).json({ success: true, message: `User registered. An OTP has been sent to ${user.email} for verification.` });
+
   } catch (error) {
     res.status(400).json({ success: false, message: "Failed to register user.", error: error.message });
   }
 });
-
 
 
 // --- 2. VERIFY EMAIL & LOGIN (This route is updated) ---

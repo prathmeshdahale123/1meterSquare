@@ -19,8 +19,15 @@ const propertySchema = new mongoose.Schema({
         required: [true, "Property type is required."],
         enum: ['Apartment', 'Villa', 'House', 'Land', 'Office', 'Shop'],
     },
-    // --- REMOVED: listingType enum no longer needed as it's always 'For Sale' ---
-
+    isResaleProperty: {
+        type: Boolean,
+        required: [true, "Please specify if this is a resale property."]
+    },
+    reraId: {
+        type: String,
+        trim: true,
+        uppercase: true, // RERA IDs are typically uppercase
+    },
     // --- Location Details ---
     location: {
         address: { type: String, required: true, trim: true },
