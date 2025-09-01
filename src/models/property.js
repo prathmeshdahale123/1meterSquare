@@ -19,6 +19,8 @@ const propertySchema = new mongoose.Schema({
         required: [true, "Property type is required."],
         enum: ['Apartment', 'Villa', 'House', 'Land', 'Office', 'Shop'],
     },
+
+    // --- RERA & Resale Fields ---
     isResaleProperty: {
         type: Boolean,
         required: [true, "Please specify if this is a resale property."]
@@ -26,8 +28,9 @@ const propertySchema = new mongoose.Schema({
     reraId: {
         type: String,
         trim: true,
-        uppercase: true, // RERA IDs are typically uppercase
+        uppercase: true, // RERA IDs are often uppercase
     },
+
     // --- Location Details ---
     location: {
         address: { type: String, required: true, trim: true },
@@ -47,7 +50,6 @@ const propertySchema = new mongoose.Schema({
         currency: { type: String, default: 'INR' },
         isNegotiable: { type: Boolean, default: false },
     },
-    // --- REMOVED: rentalDetails object ---
 
     // --- Property Specifics ---
     details: {
@@ -67,10 +69,14 @@ const propertySchema = new mongoose.Schema({
     amenities: [{ type: String, trim: true }],
 
     // --- Management & Status ---
-    listedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    listedBy: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
     status: {
         type: String,
-        enum: ['Available', 'Sold', 'Under Offer'], // --- REMOVED: 'Rented' ---
+        enum: ['Available', 'Sold', 'Under Offer'],
         default: 'Available',
     },
     isVerified: { type: Boolean, default: false },
@@ -83,16 +89,37 @@ const propertySchema = new mongoose.Schema({
     timestamps: true
 });
 
-// --- OPTIMIZATION: DATABASE INDEXES ---
+// This Mongoose hook runs before the standard validation checks.
+propertySchema.pre('validate', function(next) {
+    // Logic: If the property is a NEW listing (i.e., NOT a resale)...
+    if (this.isResaleProperty === false) {
+        // ...then the reraId field becomes required.
+        if (!this.reraId) {
+            // If it's missing, create a Mongoose validation error.
+            this.invalidate('reraId', 'RERA ID is required for new properties.');
+        }
+    }
+    // If it's a resale property, or if the RERA ID is present, continue without error.
+    next();
+});
+
+// --- PERFORMANCE OPTIMIZATION: DATABASE INDEXES ---
+// Geospatial index for map-based searches ("find near me")
 propertySchema.index({ 'location.coordinates': '2dsphere' });
+
+// Compound index for common search filters to make them fast
 propertySchema.index({ 
     'location.city': 1, 
     propertyType: 1, 
     'price.value': 1,
     'details.bedrooms': 1
 });
+
+// Index for quickly finding all properties listed by a specific user
 propertySchema.index({ listedBy: 1 });
+
 
 const Property = mongoose.model("Property", propertySchema);
 
 module.exports = { Property };
+

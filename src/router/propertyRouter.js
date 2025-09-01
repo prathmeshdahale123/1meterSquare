@@ -14,10 +14,7 @@ propertyRouter.post(
         try {
             // 1. Destructure the new `isResaleProperty` and `reraId` fields
             const { title, description, propertyType, price, location, details, amenities, isResaleProperty, reraId } = req.body;
-
-            console.log('Received Body:', req.body);
-            console.log('Received Files:', req.files);
-
+            
             // 2. Add validation for the new required field
             if (isResaleProperty === undefined) { // Check for undefined to allow `false`
                 return res.status(400).json({ success: false, message: "Please specify if this is a resale property." });
