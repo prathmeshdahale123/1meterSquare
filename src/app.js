@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const app = express();
 const cookieParser = require("cookie-parser");
+const rateLimit = require('express-rate-limit');
 const { connectDB } = require("./config/database")
 const { propertyRouter } = require("./router/propertyRouter")
 const { authRouter } = require("./router/authRouter")
@@ -29,6 +30,23 @@ const allowedOrigins = [
 app.use(express.json());
 app.use(cookieParser());
 
+// --- Rate Limiting Middleware Configuration ---
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    message: { success: false, message: 'Too many authentication attempts from this IP, please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 //health check route
 app.get('/health', (_req, res) => {
       res.status(200).json({
@@ -37,11 +55,11 @@ app.get('/health', (_req, res) => {
       });
     });
 
-    
-app.use("/", propertyRouter)
-app.use("/", authRouter)
-app.use("/", favoriteRouter)
-app.use("/", profileRouter)
+
+app.use("/", authLimiter, authRouter)
+app.use("/", apiLimiter, propertyRouter)
+app.use("/", apiLimiter, favoriteRouter)
+app.use("/", apiLimiter, profileRouter)
 
 
   
