@@ -3,6 +3,7 @@ require("dotenv").config();
 const app = express();
 const cookieParser = require("cookie-parser");
 const rateLimit = require('express-rate-limit');
+const helmet = require("helmet");
 const { connectDB } = require("./config/database")
 const { propertyRouter } = require("./router/propertyRouter")
 const { authRouter } = require("./router/authRouter")
@@ -26,6 +27,8 @@ const allowedOrigins = [
     },
     credentials: true
   }));
+
+app.use(helmet());
 
 app.use(express.json());
 app.use(cookieParser());
