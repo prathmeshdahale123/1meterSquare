@@ -12,22 +12,30 @@ const { profileRouter } = require("./router/profileRouter")
 const cors = require("cors");
 
 const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://dream-market-psi.vercel.app/",
-    "http://localhost:8080",
-    "https://dream-market-8wr9.vercel.app/"     
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:8080",
+  "https://dream-market-psi.vercel.app",
+  "https://dream-market-8wr9.vercel.app"
 ];
-  
-  app.use(cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests without origin (Postman, server-to-server, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("❌ CORS blocked request from:", origin);
       callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true
-  }));
+    }
+  },
+  credentials: true,  // Required for cookies/auth
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"], // Important
+};
+
+app.use(cors(corsOptions));
+
 
 app.use(helmet());
 
